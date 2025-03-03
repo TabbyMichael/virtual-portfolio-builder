@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowRight, Mail, Phone, Linkedin } from 'lucide-react';
+import { ArrowRight, Mail, Phone, Linkedin, Github } from 'lucide-react';
 
 const Hero = () => {
   return (
@@ -32,7 +32,7 @@ const Hero = () => {
               </a>
             </div>
             
-            <div className="flex items-center gap-6 mt-6">
+            <div className="flex flex-wrap items-center gap-6 mt-6">
               <a 
                 href="mailto:tabbynmichael@gmail.com" 
                 className="flex items-center text-muted-foreground hover:text-primary transition-colors"
@@ -60,6 +60,17 @@ const Hero = () => {
               >
                 <Linkedin className="h-5 w-5 mr-2" />
                 <span className="text-sm hidden sm:inline">LinkedIn</span>
+              </a>
+              
+              <a 
+                href="https://github.com/TabbyMichael" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center text-muted-foreground hover:text-primary transition-colors"
+                aria-label="Tabitha's GitHub"
+              >
+                <Github className="h-5 w-5 mr-2" />
+                <span className="text-sm hidden sm:inline">GitHub</span>
               </a>
             </div>
           </div>
