@@ -1,44 +1,76 @@
 
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Check } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Define form validation schema
+const formSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  subject: z.string().min(3, { message: "Subject must be at least 3 characters" }),
+  message: z.string().min(10, { message: "Message must be at least 10 characters" }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 const Contact = () => {
-  const [formState, setFormState] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  });
-  
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormState(prev => ({ ...prev, [name]: value }));
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      subject: '',
+      message: ''
+    }
+  });
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      console.log('Form submitted:', formState);
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormState({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
+    try {
+      // Simulate API call
+      console.log('Form submitted:', data);
+      
+      // Wait for 1.5 seconds to simulate server processing
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Show success toast
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for reaching out. I'll get back to you within 24 hours.",
+        variant: "default",
       });
+      
+      // Reset form
+      reset();
+      setIsSubmitted(true);
       
       // Reset success message after 5 seconds
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    }, 1500);
+    } catch (error) {
+      // Show error toast
+      toast({
+        title: "Error",
+        description: "There was a problem sending your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -63,8 +95,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-medium mb-1">Email</p>
-                    <a href="mailto:hello@tabitha.va" className="text-muted-foreground hover:text-primary transition-colors">
-                      hello@tabitha.va
+                    <a href="mailto:tabbynmichael@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
+                      tabbynmichael@gmail.com
                     </a>
                   </div>
                 </div>
@@ -75,8 +107,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-medium mb-1">Phone</p>
-                    <a href="tel:+11234567890" className="text-muted-foreground hover:text-primary transition-colors">
-                      +1 (123) 456-7890
+                    <a href="tel:+254798041879" className="text-muted-foreground hover:text-primary transition-colors">
+                      +254 798 041 879
                     </a>
                   </div>
                 </div>
@@ -96,7 +128,7 @@ const Contact = () => {
               
               <div className="mt-10">
                 <h4 className="text-lg font-semibold mb-4">Working Hours</h4>
-                <p className="text-muted-foreground mb-2">Monday - Friday: 9am - 5pm EST</p>
+                <p className="text-muted-foreground mb-2">Monday - Friday: 9am - 5pm EAT</p>
                 <p className="text-muted-foreground">Weekend availability upon request</p>
               </div>
             </div>
@@ -117,21 +149,20 @@ const Contact = () => {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-1">
                       Full Name
                     </label>
                     <input
-                      type="text"
                       id="name"
-                      name="name"
-                      value={formState.name}
-                      onChange={handleChange}
-                      className="block w-full rounded-md border border-input px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                      {...register('name')}
+                      className={`block w-full rounded-md border ${errors.name ? 'border-red-500' : 'border-input'} px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary`}
                       placeholder="Your name"
-                      required
                     />
+                    {errors.name && (
+                      <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -139,15 +170,14 @@ const Contact = () => {
                       Email Address
                     </label>
                     <input
-                      type="email"
                       id="email"
-                      name="email"
-                      value={formState.email}
-                      onChange={handleChange}
-                      className="block w-full rounded-md border border-input px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                      {...register('email')}
+                      className={`block w-full rounded-md border ${errors.email ? 'border-red-500' : 'border-input'} px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary`}
                       placeholder="Your email"
-                      required
                     />
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -155,15 +185,14 @@ const Contact = () => {
                       Subject
                     </label>
                     <input
-                      type="text"
                       id="subject"
-                      name="subject"
-                      value={formState.subject}
-                      onChange={handleChange}
-                      className="block w-full rounded-md border border-input px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                      {...register('subject')}
+                      className={`block w-full rounded-md border ${errors.subject ? 'border-red-500' : 'border-input'} px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary`}
                       placeholder="What is this regarding?"
-                      required
                     />
+                    {errors.subject && (
+                      <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -172,14 +201,14 @@ const Contact = () => {
                     </label>
                     <textarea
                       id="message"
-                      name="message"
-                      value={formState.message}
-                      onChange={handleChange}
+                      {...register('message')}
                       rows={5}
-                      className="block w-full rounded-md border border-input px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                      className={`block w-full rounded-md border ${errors.message ? 'border-red-500' : 'border-input'} px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none`}
                       placeholder="Tell me about your project..."
-                      required
                     ></textarea>
+                    {errors.message && (
+                      <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>
+                    )}
                   </div>
                   
                   <button
